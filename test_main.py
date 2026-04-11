@@ -11,16 +11,14 @@ class TestGenerateRequest(unittest.TestCase):
         all_messages = []
         user_message = "hello"
         
-        result = generate_request(all_messages, user_message, SYSTEM)
+        result = generate_request(all_messages, user_message)
         
-        self.assertEqual(len(result), 2)
-        self.assertEqual(result[0]['role'], 'system')
-        self.assertEqual(result[1]['role'], 'user')
-        self.assertEqual(result[1]['content'], 'hello')
-
+        self.assertEqual(len(result), 1)
+        self.assertEqual(result[0]['role'], 'user')
+        self.assertEqual(result[-1]['content'], 'hello')
     def test_generate_request_truncates_old_messages(self):
         """Test that generate_request keeps only last 7 messages."""
-        # Create a long conversation history
+        # Create a long conversation history (8 messages)
         all_messages = [
             {'role': 'assistant', 'content': 'old response 1'},
             {'role': 'user', 'content': 'old user 1'},
@@ -31,10 +29,10 @@ class TestGenerateRequest(unittest.TestCase):
             {'role': 'assistant', 'content': 'old response 4'},
         ]
         
-        result = generate_request(all_messages, "new message", SYSTEM)
+        result = generate_request(all_messages, "new message")
         
-        self.assertEqual(len(result), 9)  # 7 old + 2 new
-        self.assertEqual(result[0]['role'], 'system')
+        self.assertEqual(len(result), 8)  # 7 old + 1 new (truncates to last 7 then adds new)
+        self.assertEqual(result[-2]['role'], 'assistant')
         self.assertEqual(result[-1]['content'], 'new message')
 
     def test_generate_request_with_empty_history(self):
@@ -42,11 +40,11 @@ class TestGenerateRequest(unittest.TestCase):
         all_messages = []
         user_message = "first message"
         
-        result = generate_request(all_messages, user_message, SYSTEM)
+        result = generate_request(all_messages, user_message)
         
-        self.assertEqual(len(result), 2)
-        self.assertEqual(result[0]['role'], 'system')
-        self.assertEqual(result[1]['content'], 'first message')
+        self.assertEqual(len(result), 1)
+        self.assertEqual(result[0]['role'], 'user')
+        self.assertEqual(result[0]['content'], 'first message')
 
     def test_model_constant(self):
         """Test that MODEL constant is set correctly."""
@@ -76,3 +74,8 @@ class TestIntegration(unittest.TestCase):
         response_data = response.json()
         self.assertIn('choices', response_data)
         self.assertGreater(len(response_data['choices'][0]['message']['content']), 0)
+
+
+if __name__ == '__main__':
+    unittest.main()
+
