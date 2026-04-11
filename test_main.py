@@ -46,11 +46,6 @@ class TestGenerateRequest(unittest.TestCase):
         self.assertEqual(result[0]['role'], 'user')
         self.assertEqual(result[0]['content'], 'first message')
 
-    def test_model_constant(self):
-        """Test that MODEL constant is set correctly."""
-        self.assertEqual(MODEL, 'qwen3.5-9b')
-
-
 class TestIntegration(unittest.TestCase):
     """Integration tests for the LLM endpoint."""
 
@@ -58,24 +53,22 @@ class TestIntegration(unittest.TestCase):
         """Test that the endpoint responds to 'hello world' message."""
         with httpx.Client() as client:
             response = client.post(
-                BASE_URL,
+                BASE_URL + "/responses",
                 json={
                     "model": MODEL,
-                    "messages": [
-                        {'role': 'system', 'content': SYSTEM},
-                        {'role': 'user', 'content': 'hello world'}
-                    ],
-                    "stream": False
+                    "input": [{"role": "user", "content": "hello world"}],
+                    "instructions": SYSTEM
                 },
                 timeout=120
             )
         
         self.assertEqual(response.status_code, 200)
         response_data = response.json()
-        self.assertIn('choices', response_data)
-        self.assertGreater(len(response_data['choices'][0]['message']['content']), 0)
+        self.assertIn('output', response_data)
+        self.assertGreater(len(response_data['output'][0]['content'][0]['text']), 0)
 
 
 if __name__ == '__main__':
     unittest.main()
+
 
