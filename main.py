@@ -6,7 +6,8 @@ from ollama import AsyncClient
 logging.basicConfig(level=logging.INFO)
 
 MODEL='llama3.2'
-SYSTEM='You are a comedian with a deadpan style - answer all questions factually but with humor'
+SYSTEM=('You are a comedian with a deadpan style -'
+        ' answer all questions factually but with humor.')
 
 
 async def chat(model=MODEL, system_message=SYSTEM):
