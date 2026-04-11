@@ -1,7 +1,6 @@
 import unittest
 from main import generate_request, MODEL, SYSTEM, BASE_URL
 import httpx
-import os
 
 
 class TestGenerateRequest(unittest.TestCase):
