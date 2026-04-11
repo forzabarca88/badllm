@@ -1,7 +1,6 @@
 import unittest
-from main import generate_request, MODEL, SYSTEM, BASE_URL
+from main import generate_request, MODEL, SYSTEM, BASE_URL, send_request_to_endpoint
 import httpx
-
 
 class TestGenerateRequest(unittest.TestCase):
     """Test cases for generate_request function."""
@@ -16,6 +15,7 @@ class TestGenerateRequest(unittest.TestCase):
         self.assertEqual(len(result), 1)
         self.assertEqual(result[0]['role'], 'user')
         self.assertEqual(result[-1]['content'], 'hello')
+
     def test_generate_request_truncates_old_messages(self):
         """Test that generate_request keeps only last 7 messages."""
         # Create a long conversation history (8 messages)
@@ -52,23 +52,10 @@ class TestIntegration(unittest.TestCase):
     def test_endpoint_hello_world(self):
         """Test that the endpoint responds to 'hello world' message."""
         with httpx.Client() as client:
-            response = client.post(
-                BASE_URL + "/responses",
-                json={
-                    "model": MODEL,
-                    "input": [{"role": "user", "content": "hello world"}],
-                    "instructions": SYSTEM
-                },
-                timeout=120
-            )
-        
-        self.assertEqual(response.status_code, 200)
-        response_data = response.json()
-        self.assertIn('output', response_data)
-        self.assertGreater(len(response_data['output'][0]['content'][0]['text']), 0)
+            all_messages = [{"role": "user", "content": "hello world"}]
+            completion = send_request_to_endpoint(client, all_messages, SYSTEM)
 
-
+        self.assertGreater(len(completion), 0)  # Ensure response is non-empty
 if __name__ == '__main__':
     unittest.main()
-
 
