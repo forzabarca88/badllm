@@ -57,7 +57,6 @@ class TestGenerateRequest(unittest.TestCase):
 class TestIntegration(unittest.TestCase):
     """Integration tests for the LLM endpoint."""
 
-    @unittest.skipUnless(os.getenv('INTEGRATION_TESTS'), "INTEGRATION_TESTS not set")
     def test_endpoint_hello_world(self):
         """Test that the endpoint responds to 'hello world' message."""
         with httpx.Client() as client:
